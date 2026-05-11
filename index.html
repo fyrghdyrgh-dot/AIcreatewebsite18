@@ -1,0 +1,524 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>AI Agent 开发台｜自动化·工作流·工具调用</title>
+  <meta name="description" content="AI Agent 开发台：自动化工作流、工具调用、RAG、Agent 框架与部署平台入口合集。支持分类、搜索、收藏与最近使用；纯静态单页可直接部署。" />
+  <meta property="og:title" content="AI Agent 开发台" />
+  <meta property="og:description" content="自动化工作流、工具调用、RAG 与部署入口合集。支持搜索、收藏与最近使用；纯静态单页。" />
+  <meta property="og:type" content="website" />
+  <style>
+    :root{
+      --paper:#fff7ed;
+      --paper2:#ffedd5;
+      --ink:#1f2937;
+      --muted:rgba(31,41,55,.68);
+      --line:rgba(31,41,55,.12);
+      --panel:rgba(255,255,255,.86);
+      --shadow: 0 18px 60px rgba(31,41,55,.12);
+      --radius:18px;
+      --a:#f97316;
+      --b:#ef4444;
+      --c:#0ea5e9;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      color:var(--ink);
+      font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", "PingFang SC", "Microsoft YaHei", "Noto Sans CJK SC", sans-serif;
+      line-height:1.55;
+      background:
+        radial-gradient(900px 520px at 8% 8%, rgba(249,115,22,.14), transparent 62%),
+        radial-gradient(760px 440px at 92% 6%, rgba(14,165,233,.10), transparent 60%),
+        radial-gradient(820px 520px at 40% 96%, rgba(239,68,68,.08), transparent 60%),
+        linear-gradient(180deg, var(--paper2), var(--paper));
+    }
+    a{color:inherit;text-decoration:none}
+    .frame{max-width:1200px;margin:0 auto;padding:14px}
+    .head{
+      position:sticky;
+      top:0;
+      z-index:40;
+      backdrop-filter: blur(12px);
+      background: rgba(255,247,237,.78);
+      border-bottom: 1px solid var(--line);
+    }
+    .head-inner{display:flex;align-items:center;gap:12px;justify-content:space-between;padding:12px 18px;max-width:1200px;margin:0 auto}
+    .brand{display:flex;align-items:center;gap:10px;min-width:280px}
+    .badge{
+      width:38px;height:38px;border-radius:16px;
+      background:
+        radial-gradient(12px 12px at 30% 30%, rgba(255,255,255,.52), transparent 60%),
+        linear-gradient(135deg, rgba(249,115,22,1), rgba(14,165,233,.92));
+      box-shadow: 0 18px 34px rgba(249,115,22,.16);
+    }
+    .brand-text{display:flex;flex-direction:column;line-height:1.1}
+    .brand-title{font-weight:980;letter-spacing:.2px}
+    .brand-sub{font-size:12px;color:rgba(31,41,55,.62);margin-top:2px}
+    .nav{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:center;flex:1;min-width:0}
+    .nav a{
+      font-size:12.5px;
+      color: rgba(31,41,55,.86);
+      padding:8px 10px;
+      border-radius:999px;
+      border:1px solid rgba(31,41,55,.12);
+      background: rgba(255,255,255,.72);
+      transition: transform .12s ease, border-color .12s ease, background .12s ease;
+      white-space:nowrap;
+    }
+    .nav a:hover{transform: translateY(-1px); border-color: rgba(249,115,22,.34); background: rgba(255,255,255,.84)}
+    .actions{display:flex;align-items:center;gap:10px}
+    .btn{
+      display:inline-flex;align-items:center;justify-content:center;gap:8px;
+      border:1px solid rgba(31,41,55,.12);
+      background: rgba(255,255,255,.72);
+      color: rgba(31,41,55,.92);
+      border-radius:999px;
+      padding:10px 14px;
+      font-size:13px;
+      cursor:pointer;
+      user-select:none;
+      transition: transform .12s ease, background .12s ease, border-color .12s ease;
+    }
+    .btn:hover{transform: translateY(-1px); border-color: rgba(249,115,22,.34)}
+    .btn.primary{background: linear-gradient(135deg, rgba(249,115,22,1), rgba(239,68,68,.95));border-color: rgba(249,115,22,.36);color:#fff;font-weight:850}
+    .btn.ghost{background:transparent}
+    .card{background: var(--panel);border: 1px solid var(--line);border-radius: var(--radius);box-shadow: var(--shadow)}
+    .card.pad{padding:14px}
+    .anchor{scroll-margin-top: 92px}
+    .hero{
+      border-radius: 24px;
+      background:
+        radial-gradient(820px 340px at 14% 22%, rgba(249,115,22,.34), transparent 56%),
+        radial-gradient(760px 320px at 86% 18%, rgba(14,165,233,.22), transparent 60%),
+        linear-gradient(135deg, rgba(31,41,55,1), rgba(15,23,42,1));
+      border: 1px solid rgba(255,255,255,.14);
+      box-shadow: 0 24px 84px rgba(31,41,55,.22);
+      padding: 16px 12px 18px;
+      margin-top: 12px;
+      color:#fff;
+    }
+    .hero-inner{max-width: 1040px; margin: 0 auto}
+    .hero-grid{display:grid;grid-template-columns: 1.05fr .95fr;gap:14px;align-items:center}
+    .hero-title{font-size:22px; letter-spacing:.2px; margin:0; font-weight:980; color: rgba(255,255,255,.96)}
+    .hero-sub{margin:8px 0 0;color: rgba(226,232,240,.82);font-size:12.5px}
+    .searchbox{
+      display:flex;align-items:center;gap:10px;
+      padding: 12px 14px;
+      border-radius: 18px;
+      background: rgba(255,255,255,.08);
+      border: 1px solid rgba(255,255,255,.16);
+      box-shadow: 0 18px 60px rgba(0,0,0,.22);
+    }
+    .searchbox svg{opacity:.92;color:rgba(226,232,240,.92)}
+    .searchbox input{flex:1;border:0;outline:0;background:transparent;color: rgba(255,255,255,.94);font-size: 14px}
+    .searchbox input::placeholder{color: rgba(226,232,240,.72)}
+    .hero-meta{margin-top:10px;display:flex;gap:10px;flex-wrap:wrap;color: rgba(226,232,240,.78);font-size: 12px}
+    .hero-meta b{color:#fff}
+    .hero-links{margin-top:10px;display:flex;gap:10px;flex-wrap:wrap}
+    .hero-links a{
+      font-size:12px;
+      padding:7px 10px;
+      border-radius:999px;
+      background: rgba(255,255,255,.10);
+      border: 1px solid rgba(255,255,255,.16);
+      color: rgba(226,232,240,.92);
+      transition: transform .12s ease, border-color .12s ease, background .12s ease;
+      white-space:nowrap;
+    }
+    .hero-links a:hover{transform: translateY(-1px); border-color: rgba(249,115,22,.45); background: rgba(255,255,255,.13)}
+    .spot{margin-top: 12px;background: rgba(255,255,255,.86);border: 1px solid rgba(31,41,55,.12);border-radius: 22px;box-shadow: var(--shadow);overflow:hidden}
+    .spot-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding: 10px 12px;border-bottom: 1px solid rgba(31,41,55,.10);color: rgba(31,41,55,.78);font-size:12.5px}
+    .spot-left{display:flex;flex-direction:column;gap:6px;min-width:0}
+    .spot-tabs{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+    .seg{padding:6px 10px;border-radius:999px;border:1px solid rgba(31,41,55,.12);background: rgba(255,255,255,.80);color: rgba(31,41,55,.78);font-size:12px;cursor:pointer;user-select:none;transition: transform .12s ease, border-color .12s ease, background .12s ease}
+    .seg:hover{transform: translateY(-1px); border-color: rgba(249,115,22,.34)}
+    .seg.active{background: rgba(249,115,22,.14); border-color: rgba(249,115,22,.26); color: rgba(154,52,18,.98)}
+    .spot-desc{font-size:12px;color: rgba(31,41,55,.68);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .spot-body{padding: 10px 12px 12px}
+    .rec-grid{display:grid;grid-template-columns: repeat(4, minmax(0, 1fr));gap:14px}
+    .rec-card{border: 1px solid rgba(31,41,55,.12);background: rgba(255,255,255,.84);border-radius: 16px;padding: 14px;display:flex;align-items:flex-start;gap:12px;min-height: 94px;cursor:pointer;user-select:none;transition: transform .12s ease, border-color .12s ease, box-shadow .12s ease}
+    .rec-card:hover{transform: translateY(-2px); border-color: rgba(249,115,22,.24); box-shadow: 0 14px 30px rgba(31,41,55,.10)}
+    .rec-icon{width:46px;height:46px;border-radius:16px;display:flex;align-items:center;justify-content:center;background: linear-gradient(135deg, rgba(249,115,22,.16), rgba(14,165,233,.10));color: rgba(154,52,18,.98);overflow:hidden;flex:0 0 auto}
+    .rec-icon img{width:100%;height:100%;object-fit:cover;display:block}
+    .rec-icon svg{width:22px;height:22px}
+    .rec-text{min-width:0;display:flex;flex-direction:column;gap:4px}
+    .rec-name{font-weight:980;font-size:13px;color: rgba(31,41,55,.92);line-height:1.2}
+    .rec-sub{font-size:12px;color: rgba(75,85,99,.92);white-space:normal;overflow:visible;line-height:1.35}
+    .rec-hint{margin-top:10px;font-size:12px;color: rgba(75,85,99,.92)}
+    .layout{display:grid;grid-template-columns: 1fr 340px;gap:18px;margin-top:12px}
+    .tabs{display:flex;flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling: touch;gap:8px;padding:10px 12px;border-top:1px solid rgba(31,41,55,.12)}
+    .tab{padding:8px 10px;border-radius:999px;border:1px solid rgba(31,41,55,.12);background: rgba(255,255,255,.76);color: rgba(31,41,55,.84);font-size:12px;white-space:nowrap;cursor:pointer;transition: background .12s ease, border-color .12s ease, transform .12s ease}
+    .tab:hover{transform: translateY(-1px); border-color: rgba(249,115,22,.34)}
+    .tab.active{background: rgba(14,165,233,.10); border-color: rgba(14,165,233,.22); color: rgba(31,41,55,.92)}
+    .cat-quick{display:flex;gap:10px;padding: 10px 12px 12px;border-top: 1px solid rgba(31,41,55,.12);overflow-x:auto;-webkit-overflow-scrolling: touch}
+    .cat-btn{border: 1px solid rgba(31,41,55,.12);background: rgba(255,255,255,.78);border-radius: 16px;padding: 9px 10px 10px;display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer;user-select:none;min-width: 92px;transition: transform .12s ease, border-color .12s ease, box-shadow .12s ease}
+    .cat-btn:hover{transform: translateY(-2px); border-color: rgba(249,115,22,.24); box-shadow: 0 14px 30px rgba(31,41,55,.10)}
+    .cat-btn.active{border-color: rgba(14,165,233,.24); box-shadow: 0 14px 30px rgba(14,165,233,.12)}
+    .cat-ico{width: 34px; height: 34px;border-radius: 12px;display:flex;align-items:center;justify-content:center;background: linear-gradient(135deg, rgba(249,115,22,.16), rgba(14,165,233,.10));color: rgba(154,52,18,.98)}
+    .cat-name{font-size:12px; color: rgba(31,41,55,.80); text-align:center; line-height:1.2}
+    .grid{display:grid;grid-template-columns: repeat(3, minmax(0, 1fr));gap:12px;padding:14px 16px 16px;border-top:1px solid rgba(31,41,55,.12)}
+    .tool{border:1px solid rgba(31,41,55,.12);background: rgba(255,255,255,.84);border-radius: var(--radius);padding:12px;display:flex;flex-direction:column;gap:10px;min-height: 156px;transition: transform .12s ease, border-color .12s ease}
+    .tool:hover{transform: translateY(-2px); border-color: rgba(249,115,22,.24)}
+    .tool-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+    .tool-title{font-weight:980;font-size:13.5px;margin:0}
+    .tool-desc{margin:0;color: rgba(75,85,99,.92);font-size:12.5px}
+    .tags{display:flex;flex-wrap:wrap;gap:6px}
+    .tag{font-size:11px;padding:4px 8px;border-radius:999px;border:1px solid rgba(31,41,55,.12);background: rgba(255,255,255,.76);color: rgba(31,41,55,.72)}
+    .tool-actions{display:flex;align-items:center;gap:8px;margin-top:auto}
+    .mini{padding:8px 10px;border-radius:999px;border:1px solid rgba(31,41,55,.12);background: rgba(255,255,255,.76);color: rgba(31,41,55,.90);font-size:12px;cursor:pointer;display:inline-flex;align-items:center;gap:7px;transition: transform .12s ease, border-color .12s ease}
+    .mini:hover{transform: translateY(-1px); border-color: rgba(249,115,22,.30)}
+    .mini.primary{background: rgba(249,115,22,.14); border-color: rgba(249,115,22,.26)}
+    .star{width:34px;height:34px;border-radius:999px;border:1px solid rgba(31,41,55,.12);background: rgba(255,255,255,.76);cursor:pointer;display:inline-flex;align-items:center;justify-content:center}
+    .star[aria-pressed="true"]{border-color: rgba(14,165,233,.26); background: rgba(14,165,233,.10)}
+    .rightcol{display:flex;flex-direction:column;gap:12px}
+    .pill{font-size:11px;padding:4px 8px;border-radius:999px;border:1px solid rgba(249,115,22,.22);background: rgba(249,115,22,.14);color: rgba(154,52,18,.98)}
+    .muted{color: var(--muted)}
+    .foot{margin:18px 0 30px;padding:14px 16px;border-top:1px solid rgba(31,41,55,.12);display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+    .foot a{color:rgba(31,41,55,.78)}
+    .foot a:hover{color:rgba(31,41,55,.92)}
+    .divider{width:1px;height:12px;background: rgba(31,41,55,.12)}
+    .toast{position: fixed;left: 50%;transform: translateX(-50%);bottom: 18px;background: rgba(31,41,55,.92);border: 1px solid rgba(31,41,55,.18);border-radius: 999px;padding: 10px 14px;font-size: 12.5px;color: rgba(255,255,255,.96);box-shadow: var(--shadow);opacity: 0;pointer-events: none;transition: opacity .18s ease, transform .18s ease;z-index: 60;max-width: calc(100vw - 24px);text-align:center}
+    .toast.show{opacity:1; transform: translateX(-50%) translateY(-6px)}
+    .side-ad{position: fixed;left: 14px;top: 116px;z-index: 30;width: 214px;border: 1px solid rgba(31,41,55,.12);border-radius: 18px;background: rgba(255,255,255,.82);box-shadow: var(--shadow);overflow:hidden}
+    .side-ad-head{padding: 10px 10px 0;display:flex;align-items:center;justify-content:space-between;gap:10px}
+    .side-ad-title{font-weight:980;font-size:13px;color: rgba(31,41,55,.92)}
+    .side-ad-body{padding: 10px}
+    .side-ad-body p{margin:0;color: rgba(75,85,99,.92);font-size:12px;line-height:1.55}
+    .side-ad-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+    .side-ad .mini{padding:7px 10px}
+    @media (max-width: 1240px){.side-ad{display:none}}
+    .float-cta{position: fixed;right: 18px;bottom: 18px;z-index: 55;display:flex;flex-direction:column;gap:10px;align-items:flex-end}
+    .fab{border-radius: 999px;padding: 12px 14px;background: linear-gradient(135deg, rgba(249,115,22,1), rgba(239,68,68,.95));color: white;border: 1px solid rgba(249,115,22,.48);box-shadow: 0 18px 44px rgba(249,115,22,.16);cursor:pointer;font-size: 13px;display:inline-flex;align-items:center;gap:8px;user-select:none;font-weight:850;transition: transform .12s ease}
+    .fab:hover{transform: translateY(-1px)}
+    .fab.secondary{background: rgba(255,255,255,.76);color: rgba(31,41,55,.90);border-color: rgba(31,41,55,.12);box-shadow: var(--shadow);font-weight:700}
+    .inline-ad{grid-column: 1 / -1; border-radius: var(--radius); overflow:hidden}
+    .sections{display:grid;gap:12px;margin-top:14px}
+    .section-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+    .section-title{margin:0;font-size:14px;font-weight:980}
+    .section-sub{margin:4px 0 0;color: rgba(75,85,99,.92);font-size:12.5px}
+    @media (max-width: 980px){.layout{grid-template-columns: 1fr}.rightcol{order:-1}.brand{min-width:0}.nav{justify-content:flex-start}.hero-grid{grid-template-columns: 1fr}}
+    @media (max-width: 860px){.grid{grid-template-columns: repeat(2, minmax(0, 1fr))}.rec-grid{grid-template-columns: repeat(2, minmax(0, 1fr))}}
+    @media (max-width: 720px){.rec-grid{grid-template-columns: repeat(1, minmax(0, 1fr))}}
+    @media (max-width: 520px){.head-inner{flex-wrap:wrap}.brand{width:100%}.nav{width:100%;justify-content:flex-start}.actions{width:100%;justify-content:flex-end}.grid{grid-template-columns: 1fr}.float-cta{right: 12px; bottom: 12px}.hero-title{font-size:22px}}
+  </style>
+</head>
+<body>
+  <aside class="side-ad" aria-label="侧边推荐">
+    <div class="side-ad-head">
+      <div class="side-ad-title">1bgp.com 部署推荐</div>
+      <span class="pill">合作</span>
+    </div>
+    <div class="side-ad-body">
+      <p>适合跑工作流、Agent 服务、定时任务与数据处理：云/物理机可选，弹性扩。</p>
+      <div class="side-ad-actions">
+        <a class="mini primary" href="https://www.1bgp.com/" target="_blank" rel="noopener noreferrer" data-event="ac3_left_primary">方案速览</a>
+        <a class="mini" href="https://www.1bgp.com/" target="_blank" rel="noopener noreferrer" data-event="ac3_left_secondary">进入官网</a>
+      </div>
+    </div>
+  </aside>
+
+  <header class="head">
+    <div class="head-inner">
+      <div class="brand">
+        <div class="badge" aria-hidden="true"></div>
+        <div class="brand-text">
+          <div class="brand-title">AI Agent 开发台</div>
+          <div class="brand-sub">自动化 · 工作流 · 工具调用</div>
+        </div>
+      </div>
+
+      <nav class="nav" aria-label="页面导航">
+        <a href="#ac3-tools" data-event="ac3_nav_tools">工具库</a>
+        <a href="#ac3-playbook" data-event="ac3_nav_playbook">Playbook</a>
+        <a href="#ac3-ops" data-event="ac3_nav_ops">运行维护</a>
+      </nav>
+
+      <div class="actions">
+        <button class="btn ghost" id="ac3_showFavs" data-event="ac3_nav_favs" type="button">只看收藏</button>
+        <button class="btn primary" id="ac3_submitTool" data-event="ac3_nav_host" type="button">部署选型</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="frame">
+    <section class="hero" aria-label="搜索区域">
+      <div class="hero-inner">
+        <div class="hero-grid">
+          <div>
+            <h1 class="hero-title">AI Agent 开发台</h1>
+            <div class="hero-sub">把工具串起来，做成可复用流程：触发 → 调用 → 校验 → 记录 → 重试</div>
+            <div class="hero-meta">
+              <span>当前分类：<b id="ac3_activeCat">全部</b></span>
+              <span>匹配结果：<b id="ac3_count">0</b></span>
+            </div>
+            <div class="hero-links" aria-label="快捷入口">
+              <a href="#ac3-playbook" data-event="ac3_hero_playbook">Playbook</a>
+              <a href="#ac3-ops" data-event="ac3_hero_ops">运行维护</a>
+              <a href="https://www.1bgp.com/" target="_blank" rel="noopener noreferrer" data-event="ac3_hero_1bgp">1bgp 部署</a>
+            </div>
+          </div>
+          <div class="searchbox" role="search">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15Z" stroke="currentColor" stroke-width="2" opacity=".95"/>
+              <path d="M16.2 16.2 21 21" stroke="currentColor" stroke-width="2" stroke-linecap="round" opacity=".95"/>
+            </svg>
+            <input id="ac3_q" type="text" autocomplete="off" placeholder="搜索：n8n / Dify / LangGraph / RAG / 监控…" />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="spot" aria-label="推荐与最近">
+      <div class="spot-head">
+        <div class="spot-left">
+          <div class="spot-tabs" role="tablist" aria-label="推荐切换">
+            <button class="seg active" type="button" data-rec="recommend" data-event="ac3_rec_tab_recommend" aria-selected="true">工作流精选</button>
+            <button class="seg" type="button" data-rec="recent" data-event="ac3_rec_tab_recent" aria-selected="false">最近打开</button>
+          </div>
+          <div class="spot-desc" id="ac3_recommendDesc">把“能跑起来”的组件先置顶：工作流编排 + Agent 框架 + 部署。</div>
+        </div>
+        <div></div>
+      </div>
+      <div class="spot-body">
+        <div class="rec-grid" id="ac3_recommendGrid" aria-label="推荐工具列表"></div>
+        <div class="rec-hint" id="ac3_recommendHint" aria-hidden="true"></div>
+      </div>
+    </section>
+
+    <section class="layout anchor" id="ac3-tools">
+      <section class="card" aria-label="工具列表">
+        <div class="tabs" id="ac3_tabs" role="tablist" aria-label="分类筛选"></div>
+        <div class="cat-quick" id="ac3_catQuick" aria-label="分类快捷"></div>
+        <div class="grid" id="ac3_grid" aria-live="polite"></div>
+
+        <div class="foot">
+          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+            <span class="muted">© <span id="ac3_year"></span> AI Agent 开发台</span>
+            <span class="divider" aria-hidden="true"></span>
+            <a href="#" id="ac3_openDisclaimer" data-event="ac3_open_disclaimer">使用说明</a>
+            <span class="divider" aria-hidden="true"></span>
+            <a href="#" id="ac3_openPrivacy" data-event="ac3_open_privacy">隐私说明</a>
+          </div>
+          <div class="muted">外链来自第三方站点，访问与使用请自行判断风险。</div>
+        </div>
+      </section>
+
+      <aside class="rightcol" aria-label="侧栏">
+        <section class="card pad">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+            <div>
+              <div style="font-weight:980">运行提示</div>
+              <div class="muted" style="font-size:12px;margin-top:4px">Agent/工作流上线后，先把观测补齐</div>
+            </div>
+            <span class="pill">重点</span>
+          </div>
+          <div class="muted" style="font-size:12.5px;margin-top:10px;line-height:1.7">
+            建议最少三件套：请求日志（含 traceId）+ 错误告警 + 成本统计（调用量/Token/耗时）。
+          </div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px">
+            <a class="mini primary" href="https://www.1bgp.com/" target="_blank" rel="noopener noreferrer" data-event="ac3_cta_1bgp_primary">看部署方案</a>
+            <a class="mini" href="https://www.1bgp.com/" target="_blank" rel="noopener noreferrer" data-event="ac3_cta_1bgp_secondary">去官网</a>
+          </div>
+        </section>
+      </aside>
+    </section>
+
+    <section class="sections">
+      <section class="card pad anchor" id="ac3-playbook" aria-label="Playbook">
+        <div class="section-head">
+          <div>
+            <h2 class="section-title">Playbook（落地套路）</h2>
+            <p class="section-sub">从一个“小而可控”的 Agent 开始：先做工具调用，再做记忆与多步规划。</p>
+          </div>
+        </div>
+        <div class="muted" style="font-size:12.5px;margin-top:10px;line-height:1.75">
+          推荐路径：① 定义输入/输出与边界 ② 增加工具列表与权限 ③ 加“校验器/约束” ④ 记录执行日志 ⑤ 加重试与回滚 ⑥ 做成本与效果评估。
+        </div>
+      </section>
+
+      <section class="card pad anchor" id="ac3-ops" aria-label="运行维护">
+        <div class="section-head">
+          <div>
+            <h2 class="section-title">运行维护</h2>
+            <p class="section-sub">Agent 不是一次性脚本：要考虑失败、超时、限流、数据安全与审计。</p>
+          </div>
+        </div>
+        <div class="muted" style="font-size:12.5px;margin-top:10px;line-height:1.75">
+          常见故障点：外部 API 抖动、网页结构变动、Token 成本飙升、权限过大、并发导致的数据竞争与重复执行。
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <div class="float-cta">
+    <a class="fab" id="ac3_fabMain" href="https://www.1bgp.com/" target="_blank" rel="noopener noreferrer" data-event="ac3_fab_1bgp">打开 1bgp 官网</a>
+    <button class="fab secondary" id="ac3_fabTop" data-event="ac3_fab_top" type="button">回到顶部</button>
+  </div>
+
+  <div class="toast" id="ac3_toast" role="status" aria-live="polite"></div>
+
+  <script>
+    const tools = [
+      { name: "n8n", desc: "开源自动化工作流，适合自部署与扩展连接器。", url: "https://n8n.io", cat: "工作流/自动化", tags: ["开源","自部署","连接器"], icon: "https://www.iliudar.com/api/icon?url=https%3A%2F%2Fn8n.io&v=6" },
+      { name: "Zapier", desc: "SaaS 自动化连接器丰富，适合快速串联工具。", url: "https://zapier.com", cat: "工作流/自动化", tags: ["集成","SaaS","触发器"], icon: "https://www.iliudar.com/api/icon?url=https%3A%2F%2Fzapier.com&v=6" },
+      { name: "Make", desc: "可视化自动化平台，适合搭建流程与数据路由。", url: "https://www.make.com", cat: "工作流/自动化", tags: ["可视化","路由","集成"], icon: "https://www.iliudar.com/api/icon?url=https%3A%2F%2Fwww.make.com&v=6" },
+      { name: "Dify", desc: "LLM 应用编排与工作流，适合搭建 AI 应用与工具链。", url: "https://dify.ai", cat: "应用编排", tags: ["工作流","应用","编排"], icon: "https://www.iliudar.com/api/icon?url=https%3A%2F%2Fdify.ai&v=6" },
+      { name: "Flowise", desc: "低代码 LLM 工作流，适合快速搭 RAG 与 Agent。", url: "https://flowiseai.com", cat: "应用编排", tags: ["低代码","RAG","Agent"], icon: "https://www.iliudar.com/api/icon?url=https%3A%2F%2Fflowiseai.com&v=6" },
+      { name: "LangGraph", desc: "面向复杂 Agent 的状态机/图编排框架。", url: "https://langchain-ai.github.io/langgraph/", cat: "Agent/框架", tags: ["Agent","状态机","编排"], icon: "https://www.iliudar.com/api/icon?url=https%3A%2F%2Flangchain-ai.github.io%2Flanggraph%2F&v=6" },
+      { name: "LangChain", desc: "LLM 应用框架，适合工具调用、RAG 与 Agent。", url: "https://python.langchain.com", cat: "Agent/框架", tags: ["RAG","工具调用","链式"], icon: "https://www.iliudar.com/api/icon?url=https%3A%2F%2Fpython.langchain.com&v=6" },
+      { name: "LlamaIndex", desc: "RAG 数据框架，适合接入知识库与检索。", url: "https://www.llamaindex.ai", cat: "RAG/知识库", tags: ["RAG","索引","检索"], icon: "https://www.iliudar.com/api/icon?url=https%3A%2F%2Fwww.llamaindex.ai&v=6" },
+      { name: "Pinecone", desc: "向量数据库服务，适合检索与语义搜索。", url: "https://www.pinecone.io", cat: "RAG/知识库", tags: ["向量库","检索","云"], icon: "https://www.iliudar.com/api/icon?url=https%3A%2F%2Fwww.pinecone.io&v=6" },
+      { name: "Qdrant", desc: "向量数据库，支持自部署与云服务。", url: "https://qdrant.tech", cat: "RAG/知识库", tags: ["向量库","自部署","检索"], icon: "https://www.iliudar.com/api/icon?url=https%3A%2F%2Fqdrant.tech&v=6" },
+      { name: "OpenAI Platform", desc: "OpenAI API 平台，适合工具调用、函数调用与多模态。", url: "https://platform.openai.com", cat: "模型/API", tags: ["API","工具调用","多模态"], icon: "https://www.iliudar.com/api/icon?url=https%3A%2F%2Fplatform.openai.com&v=6" },
+      { name: "Anthropic Console", desc: "Claude API 管理入口，适合长文本与工具调用。", url: "https://console.anthropic.com", cat: "模型/API", tags: ["Claude","API","长文"], icon: "https://www.iliudar.com/api/icon?url=https%3A%2F%2Fconsole.anthropic.com&v=6" },
+      { name: "DeepSeek", desc: "推理与编码能力强，适合做工具型 Agent 与代码任务。", url: "https://chat.deepseek.com", cat: "模型/API", tags: ["推理","编码","中文"], icon: "https://www.aig123.com/wp-content/uploads/2024/05/deepseek.png" },
+      { name: "Playwright", desc: "浏览器自动化与网页操作，适合 Agent 做网页任务。", url: "https://playwright.dev", cat: "浏览器/采集", tags: ["自动化","网页","测试"], icon: "https://www.iliudar.com/api/icon?url=https%3A%2F%2Fplaywright.dev&v=6" },
+      { name: "Puppeteer", desc: "Node.js 浏览器自动化，适合抓取与自动化脚本。", url: "https://pptr.dev", cat: "浏览器/采集", tags: ["自动化","抓取","Node"], icon: "https://www.iliudar.com/api/icon?url=https%3A%2F%2Fpptr.dev&v=6" },
+      { name: "Apify", desc: "爬虫与自动化平台，适合任务托管与数据采集。", url: "https://apify.com", cat: "浏览器/采集", tags: ["采集","托管","爬虫"], icon: "https://www.iliudar.com/api/icon?url=https%3A%2F%2Fapify.com&v=6" },
+      { name: "Docker", desc: "容器化部署，适合把 Agent 与依赖打包上线。", url: "https://www.docker.com", cat: "部署/运维", tags: ["容器","部署","环境"], icon: "https://www.iliudar.com/api/icon?url=https%3A%2F%2Fwww.docker.com&v=6" },
+      { name: "Vercel", desc: "适合前端/全栈与函数部署的上线平台。", url: "https://vercel.com", cat: "部署/运维", tags: ["部署","函数","全栈"], icon: "https://www.iliudar.com/api/icon?url=https%3A%2F%2Fvercel.com&v=6" },
+      { name: "Railway", desc: "快速上线服务与数据库，适合工作流与小服务。", url: "https://railway.app", cat: "部署/运维", tags: ["部署","数据库","服务"], icon: "https://www.iliudar.com/api/icon?url=https%3A%2F%2Frailway.app&v=6" },
+      { name: "Sentry", desc: "错误监控与追踪，适合 Agent 线上问题定位。", url: "https://sentry.io", cat: "观测/监控", tags: ["报错","追踪","告警"], icon: "https://www.iliudar.com/api/icon?url=https%3A%2F%2Fsentry.io&v=6" },
+      { name: "Grafana", desc: "监控看板与告警，适合指标追踪与成本观察。", url: "https://grafana.com", cat: "观测/监控", tags: ["监控","看板","告警"], icon: "https://www.iliudar.com/api/icon?url=https%3A%2F%2Fgrafana.com&v=6" }
+    ];
+
+    tools.unshift(
+      { name: "ChatGPT", desc: "通用对话助手，可用于写工具描述、设计流程与排错。", url: "https://chat.openai.com", cat: "模型/API", tags: ["对话","写作","排错"], icon: "https://www.iliudar.com/api/icon?url=https%3A%2F%2Fchat.openai.com&v=6" },
+      { name: "Kimi", desc: "长文阅读与总结，适合整理需求、读文档与写 SOP。", url: "https://kimi.moonshot.cn", cat: "模型/API", tags: ["长文","总结","中文"], icon: "https://www.iliudar.com/api/icon?url=https%3A%2F%2Fkimi.moonshot.cn&v=6" }
+    );
+
+    const state = { activeCat: "全部", q: "", favOnly: false, favs: new Set() };
+    const els = {
+      q: document.getElementById("ac3_q"),
+      recommendGrid: document.getElementById("ac3_recommendGrid"),
+      recommendDesc: document.getElementById("ac3_recommendDesc"),
+      recommendHint: document.getElementById("ac3_recommendHint"),
+      tabs: document.getElementById("ac3_tabs"),
+      catQuick: document.getElementById("ac3_catQuick"),
+      grid: document.getElementById("ac3_grid"),
+      activeCat: document.getElementById("ac3_activeCat"),
+      count: document.getElementById("ac3_count"),
+      showFavs: document.getElementById("ac3_showFavs"),
+      year: document.getElementById("ac3_year"),
+      toast: document.getElementById("ac3_toast"),
+      fabTop: document.getElementById("ac3_fabTop"),
+      submitTool: document.getElementById("ac3_submitTool"),
+      openDisclaimer: document.getElementById("ac3_openDisclaimer"),
+      openPrivacy: document.getElementById("ac3_openPrivacy")
+    };
+    const LS_KEY = "aiCoding3:favs";
+    const REC_KEY = "aiCoding3:recent";
+
+    function getCategories(items){const set=new Set(items.map(x=>x.cat));return ["全部",...Array.from(set).sort((a,b)=>a.localeCompare(b,"zh-Hans-CN"))]}
+    function normalize(s){return (s||"").toLowerCase().trim()}
+    function matchesQuery(item,q){if(!q) return true;const hay=[item.name,item.desc,item.cat,...(item.tags||[])].join(" ").toLowerCase();return hay.includes(q)}
+    function shouldShow(item){if(state.activeCat!=="全部"&&item.cat!==state.activeCat) return false;if(state.favOnly&&!state.favs.has(item.name)) return false;if(!matchesQuery(item,state.q)) return false;return true}
+    function escapeHtml(s){return String(s).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;")}
+    function toast(msg){els.toast.textContent=msg;els.toast.classList.add("show");clearTimeout(toast._t);toast._t=setTimeout(()=>els.toast.classList.remove("show"),1600)}
+    function track(el){const ev=el?.dataset?.event;if(!ev) return;window.__events=window.__events||[];window.__events.push({event:ev,ts:Date.now()})}
+    function saveFavs(){localStorage.setItem(LS_KEY,JSON.stringify(Array.from(state.favs)))}
+    function loadFavs(){try{const raw=localStorage.getItem(LS_KEY);if(!raw) return;const arr=JSON.parse(raw);if(Array.isArray(arr)) state.favs=new Set(arr)}catch(_){}} 
+    function loadRecents(){try{const raw=localStorage.getItem(REC_KEY);if(!raw) return [];const arr=JSON.parse(raw);return Array.isArray(arr)?arr.filter(Boolean):[]}catch(_){return []}}
+    function saveRecents(list){try{localStorage.setItem(REC_KEY,JSON.stringify(list.slice(0,12)))}catch(_){}} 
+    function pushRecent(name){if(!name) return;const list=loadRecents();const next=[name,...list.filter(x=>x!==name)].slice(0,12);saveRecents(next)}
+    function updateCounts(n){if(typeof n==="number") els.count.textContent=String(n)}
+    function iconSvg(cat){
+      const common={
+        "工作流/自动化":`<svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 7h10v10H7V7Z" stroke="currentColor" stroke-width="2"/><path d="M4 12h3m10 0h3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>`,
+        "应用编排":`<svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 3 3 8v8l9 5 9-5V8l-9-5Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M12 12 21 8" stroke="currentColor" stroke-width="2" opacity=".8"/></svg>`,
+        "Agent/框架":`<svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 18a4 4 0 0 1-4-4V8a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4v6a4 4 0 0 1-4 4H11l-4 3v-3H7Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>`,
+        "RAG/知识库":`<svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 4h10a2 2 0 0 1 2 2v14H7a2 2 0 0 0-2 2V6a2 2 0 0 1 2-2Z" stroke="currentColor" stroke-width="2"/><path d="M7 20h12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>`,
+        "模型/API":`<svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>`,
+        "浏览器/采集":`<svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6Z" stroke="currentColor" stroke-width="2"/><path d="M4 10h16" stroke="currentColor" stroke-width="2" opacity=".85"/></svg>`,
+        "部署/运维":`<svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 2 2 7l10 5 10-5-10-5Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M2 17l10 5 10-5" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M2 12l10 5 10-5" stroke="currentColor" stroke-width="2" stroke-linejoin="round" opacity=".85"/></svg>`,
+        "观测/监控":`<svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 19V5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M4 19h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M8 15l3-6 3 4 2-3 2 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`
+      };
+      return common[cat]||`<svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18Z" stroke="currentColor" stroke-width="2"/><path d="M8 12h8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>`;
+    }
+    function toolIconSvg(){return iconSvg("工作流/自动化")}
+    function toolIconHtml(tool){if(tool?.icon){return `<img src="${escapeHtml(tool.icon)}" alt="${escapeHtml(tool.name)}" loading="lazy" decoding="async" referrerpolicy="no-referrer" data-icon-name="${escapeHtml(tool.name)}" />`;}return toolIconSvg()}
+    function attachIconFallback(root){if(!root) return;root.querySelectorAll('img[data-icon-name]').forEach(img=>{img.addEventListener("error",()=>{const wrap=img.parentElement;if(!wrap) return;wrap.innerHTML=toolIconSvg()},{once:true})})}
+    function renderTabs(){
+      const categories=getCategories(tools);
+      els.tabs.innerHTML=categories.map(cat=>{
+        const active=cat===state.activeCat?"active":"";
+        return `<button class="tab ${active}" type="button" role="tab" aria-selected="${active?"true":"false"}" data-cat="${escapeHtml(cat)}" data-event="ac3_tab_${escapeHtml(cat)}">${escapeHtml(cat)}</button>`;
+      }).join("");
+    }
+    function renderCatQuick(){
+      const categories=getCategories(tools).filter(x=>x!=="全部").slice(0,16);
+      els.catQuick.innerHTML=categories.map(cat=>{
+        const active=cat===state.activeCat?"active":"";
+        return `<button class="cat-btn ${active}" type="button" data-cat="${escapeHtml(cat)}" data-event="ac3_cat_${escapeHtml(cat)}"><span class="cat-ico">${iconSvg(cat)}</span><span class="cat-name">${escapeHtml(cat)}</span></button>`;
+      }).join("");
+    }
+    function renderInlineAd(){
+      return `<div class="card inline-ad" role="region" aria-label="信息流推荐"><div style="padding:12px 12px 0;display:flex;align-items:center;justify-content:space-between;gap:10px"><span class="muted" style="font-size:12px">合作推荐</span><span class="pill">1bgp</span></div><div style="padding:12px"><div style="font-weight:980">1bgp.com 云服务器 / 物理服务器</div><div class="muted" style="margin-top:6px;font-size:12.5px;line-height:1.6">适合部署工作流、Agent 服务与数据处理任务；按需扩容。</div><div style="margin-top:10px;display:flex;gap:10px;flex-wrap:wrap"><a class="mini primary" href="https://www.1bgp.com/" target="_blank" rel="noopener noreferrer" data-event="ac3_ad_feed_click">了解方案</a><a class="mini" href="https://www.1bgp.com/" target="_blank" rel="noopener noreferrer" data-event="ac3_ad_feed_go">进入官网</a></div></div></div>`;
+    }
+    function renderGrid(){
+      const list=tools.filter(shouldShow);
+      els.activeCat.textContent=state.activeCat;
+      updateCounts(list.length);
+      if(list.length===0){
+        els.grid.innerHTML=`<div class="tool" style="grid-column:1 / -1"><div class="tool-title">没有匹配结果</div><p class="tool-desc">试试切换分类、精简关键词，或关闭“只看收藏”。</p><div class="tool-actions"><button class="mini primary" type="button" id="ac3_resetFilters" data-event="ac3_reset_filters">重置筛选</button><a class="mini" href="https://www.1bgp.com/" target="_blank" rel="noopener noreferrer" data-event="ac3_cta_from_empty">看看部署方案</a></div></div>`;
+        document.getElementById("ac3_resetFilters").addEventListener("click",(e)=>{track(e.currentTarget);state.activeCat="全部";state.q="";state.favOnly=false;els.q.value="";els.showFavs.textContent="只看收藏";renderTabs();renderCatQuick();renderGrid();toast("已重置")});
+        return;
+      }
+      const nodes=[];const insertAt=Math.min(6,list.length);
+      list.forEach((item,idx)=>{
+        if(idx===insertAt) nodes.push(renderInlineAd());
+        const fav=state.favs.has(item.name);
+        nodes.push(`<article class="tool"><div class="tool-head"><div><h3 class="tool-title">${escapeHtml(item.name)}</h3><p class="tool-desc">${escapeHtml(item.desc)}</p></div><button class="star" type="button" aria-label="收藏" aria-pressed="${fav?"true":"false"}" data-fav="${escapeHtml(item.name)}" data-event="ac3_fav_toggle"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 17.3 6.2 20.6l1.1-6.6L2.6 9.7l6.6-1 2.8-6 2.8 6 6.6 1-4.7 4.3 1.1 6.6L12 17.3Z" stroke="currentColor" stroke-width="2" opacity="${fav?"1":".7"}" fill="${fav?"rgba(14,165,233,.14)":"transparent"}"/></svg></button></div><div class="tags"><span class="tag">${escapeHtml(item.cat)}</span>${(item.tags||[]).slice(0,3).map(t=>`<span class="tag">${escapeHtml(t)}</span>`).join("")}</div><div class="tool-actions"><a class="mini primary" href="${escapeHtml(item.url)}" target="_blank" rel="noopener noreferrer" data-event="ac3_tool_open" data-tool="${escapeHtml(item.name)}">打开</a><button class="mini" type="button" data-event="ac3_tool_copy" data-copy="${escapeHtml(item.name)}｜${escapeHtml(item.url)}">复制链接</button></div></article>`);
+      });
+      els.grid.innerHTML=nodes.join("");
+      els.grid.querySelectorAll("[data-fav]").forEach(btn=>{btn.addEventListener("click",(e)=>{track(e.currentTarget);const name=e.currentTarget.getAttribute("data-fav");if(!name) return;if(state.favs.has(name)) state.favs.delete(name); else state.favs.add(name);saveFavs();renderGrid();toast(state.favs.has(name)?"已收藏":"已取消")})});
+      els.grid.querySelectorAll("[data-copy]").forEach(btn=>{btn.addEventListener("click",async (e)=>{track(e.currentTarget);const text=e.currentTarget.getAttribute("data-copy")||"";try{await navigator.clipboard.writeText(text);toast("已复制")}catch(_){const ta=document.createElement("textarea");ta.value=text;ta.style.position="fixed";ta.style.left="-9999px";document.body.appendChild(ta);ta.select();document.execCommand("copy");ta.remove();toast("已复制")}})});
+      els.grid.querySelectorAll('a[data-event="ac3_tool_open"]').forEach(a=>{a.addEventListener("click",(e)=>{track(e.currentTarget);const name=e.currentTarget.getAttribute("data-tool")||"";pushRecent(name)})});
+    }
+    function renderRecommend(mode){
+      const prefer=["n8n","Dify","LangGraph","LangChain","LlamaIndex","OpenAI Platform","Anthropic Console","Playwright","Docker","Sentry","Kimi","ChatGPT"];
+      let list=[];
+      if(mode==="recent"){
+        const recentNames=loadRecents();
+        list=recentNames.map(n=>tools.find(t=>t.name===n)).filter(Boolean);
+        els.recommendDesc.textContent="最近打开过的入口（只保存在当前浏览器）。";
+        els.recommendHint.textContent=list.length?"":"暂无记录。点击任意工具后会自动出现。";
+      }else{
+        const picked=[];
+        for(const n of prefer){const t=tools.find(x=>x.name===n);if(t) picked.push(t);}
+        for(const t of tools){if(!picked.some(x=>x.name===t.name)) picked.push(t);}
+        list=picked;
+        els.recommendDesc.textContent="工作流精选入口 + 全量工具（图标加载失败会自动兜底）。";
+        els.recommendHint.textContent="";
+      }
+      els.recommendGrid.innerHTML=list.map(t=>`<a class="rec-card" href="${escapeHtml(t.url)}" target="_blank" rel="noopener noreferrer" data-event="ac3_rec_open_${escapeHtml(t.name)}" data-tool="${escapeHtml(t.name)}"><span class="rec-icon">${toolIconHtml(t)}</span><span class="rec-text"><span class="rec-name">${escapeHtml(t.name)}</span><span class="rec-sub">${escapeHtml(t.desc||"")}</span></span></a>`).join("");
+      attachIconFallback(els.recommendGrid);
+      els.recommendGrid.querySelectorAll("a").forEach(a=>{a.addEventListener("click",(e)=>{track(e.currentTarget);const name=e.currentTarget.getAttribute("data-tool")||"";pushRecent(name)})});
+    }
+    function setActiveCat(cat){state.activeCat=cat;renderTabs();renderCatQuick();renderGrid()}
+    function init(){
+      loadFavs();
+      els.year.textContent=String(new Date().getFullYear());
+      renderRecommend("recommend");
+      renderTabs();
+      renderCatQuick();
+      renderGrid();
+      updateCounts(tools.length);
+      const recTabs=document.querySelectorAll("[data-rec]");
+      recTabs.forEach(btn=>{btn.addEventListener("click",(e)=>{track(e.currentTarget);const mode=e.currentTarget.getAttribute("data-rec")||"recommend";recTabs.forEach(x=>{const active=x===e.currentTarget;x.classList.toggle("active",active);x.setAttribute("aria-selected",active?"true":"false")});renderRecommend(mode)})});
+      els.q.addEventListener("input",()=>{state.q=normalize(els.q.value);renderGrid()});
+      els.tabs.addEventListener("click",(e)=>{const btn=e.target.closest("[data-cat]");if(!btn) return;track(btn);const cat=btn.getAttribute("data-cat");if(!cat) return;setActiveCat(cat)});
+      els.catQuick.addEventListener("click",(e)=>{const btn=e.target.closest("[data-cat]");if(!btn) return;track(btn);const cat=btn.getAttribute("data-cat");if(!cat) return;setActiveCat(cat)});
+      els.showFavs.addEventListener("click",(e)=>{track(e.currentTarget);state.favOnly=!state.favOnly;els.showFavs.textContent=state.favOnly?"显示全部":"只看收藏";renderGrid();toast(state.favOnly?"仅显示收藏":"显示全部")});
+      els.fabTop.addEventListener("click",(e)=>{track(e.currentTarget);window.scrollTo({top:0,behavior:"smooth"})});
+      els.submitTool.addEventListener("click",(e)=>{track(e.currentTarget);window.open("https://www.1bgp.com/","_blank","noopener,noreferrer")});
+      els.openDisclaimer.addEventListener("click",(e)=>{e.preventDefault();track(e.currentTarget);toast("使用说明：本站为工具入口与流程备忘整理，内容仅供参考。")});
+      els.openPrivacy.addEventListener("click",(e)=>{e.preventDefault();track(e.currentTarget);toast("隐私说明：收藏/最近使用仅保存在你的浏览器本地，不会上传。")});
+    }
+    init();
+  </script>
+</body>
+</html>
